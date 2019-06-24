@@ -5,68 +5,79 @@
 //                                                                             *
 //******************************************************************************
 
-#ifndef ISING_H
-#define ISING_H
+
+#ifndef GPU_ISING_H
+#define GPU_ISING_H
 
 #include <iostream>
-#include <vector>
-#include <random>
 
 #include "lattice.cuh"
+#include "cpu_ising.cuh"
 
 using namespace std;
 
-struct variables{
-  //Lattice variables
-  int size;
-  double j;
-  double beta;
-  double h;
 
-  //Constructor and destructor defined in .cu
-  variables(int, double, double, double);
+
+class gpu_Ising
+{
+private:
+  variables *constants;
+  lattice *lattice;
+  int *sharedlattice;
+  int sub_Size;
+
+
+  //Looks down in a given dimension, if the dimension is too small it returns
+  // the size of the lattice -1, giving the lattice a periodic nature
+  __device__ int LookDown(int);
+
+
+  //Looks up in a given dimnension, if the dimension is too large it returns a
+  //0 - giving our lattice a periodic nature
+  __device__ int LookUp(int);
+
+
+  //Populates the sublattice from the major lattice
+  __device__ void PopulateSubLattice();
+
+
+  //Returns 1D array location using the 4D parameters
+  __device__ int GetLoc(int, int, int, int);
+
+
+  //Gets the difference in energy if spin is changed
+  //__device__ double EnergyDiff(variables, int*);
+
+
+  //Returns the Boltzmann distribution of a given energy difference
+  //_device__ float BoltzmannDist(variables, double);
+
+
+  //Equilibriates a given sublattice
+  //__device__ void ThreadEquilibriate(variables, int*);
+
+
+public:
+
+  //Constructor
+  __device__ gpu_Ising(variables*, lattice::lattice *, int *, int);
+
+  //Each thread will equilibrate the lattice
+  __device__ void Equilibrate();
+
+
+
 };
 
 
 
 
 
-//************************
-//    Device Functions   *
-//************************
-
-
-//Looks down in a given dimension, if the dimension is too small it returns
-// the size of the lattice -1, giving the lattice a periodic nature
-__device__ int LookDown(variables, int);
 
 
 
-//Looks up in a given dimnension, if the dimension is too large it returns a
-//0 - giving our lattice a periodic nature
-__device__ int LookUp(variables, int);
 
-
-
-//Populates the sublattice from the major lattice
-__device__ void PopulateSubLattice(variables, int, int*);
-
-
-
-//Gets the difference in energy if spin is changed
-__device__ double EnergyDiff(variables, int*);
-
-//Returns the Boltzmann distribution of a given energy difference
-__device__ float BoltzmannDist(variables, double);
-
-//Equilibriates a given sublattice
-__device__ void ThreadEquilibriate(variables, int*);
-
-
-
-__global__ void GPU_Equilibriate(variables, int[]);
-
-
+/*
 
 //**********************************
 //    Class for GPU Ising model    *
@@ -111,9 +122,8 @@ public:
 
   //Equilibrates the lattice
   __host__ void Equilibrate();
-
-
-
 };
+
+*/
 
 #endif

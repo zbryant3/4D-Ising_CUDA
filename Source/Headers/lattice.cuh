@@ -31,10 +31,13 @@ private:
 public:
 
   //Constructor
-  CUDA_CALLABLE_MEMBER lattice(int xyzSize, int tSize = 1);
+  CUDA_CALLABLE_MEMBER lattice(int xyzSizes, int tSize);
 
   //Destructor
   CUDA_CALLABLE_MEMBER ~lattice();
+
+  //Makes new lattice for memory
+  CUDA_CALLABLE_MEMBER void NewLattice(int xyzSizes, int tSize);
 
   //Returns the lattice value at a given location
   CUDA_CALLABLE_MEMBER int ReturnLocation(int x, int y, int z, int t);
@@ -47,7 +50,7 @@ public:
 
   //Averages over the whole lattice
   //Note: This will only work for simple data types such as int, double, etc.
-  CUDA_CALLABLE_MEMBER  int AverageLattice();
+  CUDA_CALLABLE_MEMBER  double AverageLattice();
 
 
 

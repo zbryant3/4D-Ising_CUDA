@@ -13,26 +13,20 @@
 #include <fstream>
 #include <string.h>
 
-
-//Header for gnuplot
+//Enables use of gnuplot from file
 #include "./Headers/gnuplot-iostream.h"
 
-
-#include "./Headers/lattice.cuh"
-
-using namespace std;
+//Contains class wrap for ising model to be performed on the gpu
+#include "./Headers/cpu_ising.cuh"
 
 
 //**************************************
 //   Definition of all the variables   *
 //**************************************
-#define LATTSIZE 80 //Must be multiple of 8 for now
-
-
-
-__global__ void test(){
-  lattice test(4);
-};
+#define LATTSIZE 16 //Must be multiple of 8 for now
+#define J .5
+#define BETA 0.2
+#define H 0.1
 
 
 //**********************
@@ -40,7 +34,8 @@ __global__ void test(){
 //**********************
 int main()
 {
-  test<<<10,1>>>();
+  ising_model test(LATTSIZE, J, BETA, H);
+  test.Equilibrate();
 
   return 0;
 

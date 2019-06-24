@@ -28,21 +28,20 @@ struct variables{
 };
 
 
+//Kernal for GPU
+__global__ void GPU_Equilibriate(variables , lattice);
+
+
 //**********************************
 //    Class for CPU Ising model    *
 //**********************************
 class ising_model
 {
 private:
-  variables *host_mem;
-  variables *gpu_mem;
-  lattice *host_major_lattice;
-  lattice *gpu_major_lattice;
-
-
-  //Equilibrates sublattices on the gpu
-  //__global__ void GPU_Equilibriate(std::vector<std::vector<int>>);
-
+  variables *host_const;
+  variables *gpu_const;
+  lattice *host_lattice;
+  lattice *gpu_lattice;
 
 public:
 
