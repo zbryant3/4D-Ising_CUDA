@@ -18,42 +18,18 @@
 #endif
 
 
-class lattice{
-
-private:
-  int* latt;
-  int xyzsize;
-  int tsize;
-
-  //Returns 1D location using the 4D parameters - PRIVATE
-  CUDA_CALLABLE_MEMBER int GetLocation(int x, int y, int z, int t);
-
-public:
-
-  //Constructor
-  CUDA_CALLABLE_MEMBER lattice(int xyzSizes, int tSize);
-
-  //Destructor
-  CUDA_CALLABLE_MEMBER ~lattice();
-
-  //Makes new lattice for memory
-  CUDA_CALLABLE_MEMBER void NewLattice(int xyzSizes, int tSize);
-
-  //Returns the lattice value at a given location
-  CUDA_CALLABLE_MEMBER int ReturnLocation(int x, int y, int z, int t);
-
-  //Changes the value of lattice at given location.
-  CUDA_CALLABLE_MEMBER void SetLocation(int x, int y, int z, int t, int newData);
-
-  //Initializes all lattice sites to the passed data
-  CUDA_CALLABLE_MEMBER void Initialize(int set);
-
-  //Averages over the whole lattice
-  //Note: This will only work for simple data types such as int, double, etc.
-  CUDA_CALLABLE_MEMBER  double AverageLattice();
 
 
+//Returns 1D location using the 4D parameters - PRIVATE
+CUDA_CALLABLE_MEMBER int MajLocation(int x, int y, int z, int t, int xyzsize);
 
-};
+//Returns 1D location using the 4D parameters - PRIVATE
+CUDA_CALLABLE_MEMBER int SubLocation(int x, int y, int z, int t, int xyzsize);
+
+
+//Initializes all lattice sites to the passed data
+CUDA_CALLABLE_MEMBER void Initialize(int *, int, int);
+
+
 
 #endif

@@ -21,10 +21,13 @@ using namespace std;
 class gpu_Ising
 {
 private:
-  variables *constants;
-  lattice *lattice;
-  int *sharedlattice;
-  int sub_Size;
+  int *LatticeSize;
+  double *beta;
+  double *j;
+  double *h;
+
+  int *Lattice;
+  int *SubLattice;
 
 
   //Looks down in a given dimension, if the dimension is too small it returns
@@ -41,9 +44,8 @@ private:
   __device__ void PopulateSubLattice();
 
 
-  //Returns 1D array location using the 4D parameters
-  __device__ int GetLoc(int, int, int, int);
-
+  //Equilibrate the 3D segments of the Lattice
+  __device void ThreeDEquilibrate();
 
   //Gets the difference in energy if spin is changed
   //__device__ double EnergyDiff(variables, int*);
@@ -60,7 +62,7 @@ private:
 public:
 
   //Constructor
-  __device__ gpu_Ising(variables*, lattice::lattice *, int *, int);
+  __device__ gpu_Ising(int*, double*, double*, double*, int*, int*);
 
   //Each thread will equilibrate the lattice
   __device__ void Equilibrate();
