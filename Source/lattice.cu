@@ -9,33 +9,7 @@
 
 #include <stdio.h> //For testing
 
-/*
-   //Makes new lattice for memory
-   CUDA_CALLABLE_MEMBER void lattice::NewLattice(int xyzSizes, int tSize){
-   delete[] latt;
-   xyzsize = xyzSizes;
-   tsize = tSize;
-   latt = new int[xyzsize*xyzsize*xyzsize*tsize];
-   };
 
-
-
-
-
-
-   //Returns the lattice value at a given location
-   CUDA_CALLABLE_MEMBER int lattice::ReturnLocation(int x, int y, int z, int t){
-   return latt[GetLocation(x, y, z, t)];
-   };
-
-
-
-   //Changes the value of lattice at given location.
-   CUDA_CALLABLE_MEMBER void lattice::SetLocation(int x, int y, int z, int t, int newData){
-   latt[GetLocation(x,y,z,t)] = newData;
-   };
-
- */
 
 
 
@@ -56,8 +30,8 @@ CUDA_CALLABLE_MEMBER int MajLocation(int x, int y, int z, int t, int LatticeSize
 
 CUDA_CALLABLE_MEMBER int SubLocation(int x, int y, int z, int t, int LatticeSize){
 
-        return (x + y*(LatticeSize + 2) + z*(LatticeSize + 2)*(LatticeSize/4 + 2)
-        + t*(LatticeSize + 2)*(LatticeSize/4 + 2)*(LatticeSize/4 + 2));
+        return (x + y*(LatticeSize + 2) + z*(LatticeSize + 2)*(LatticeSize/8 + 2)
+        + t*(LatticeSize + 2)*(LatticeSize/8 + 2)*(LatticeSize/8 + 2));
 };
 
 
@@ -75,7 +49,7 @@ CUDA_CALLABLE_MEMBER void Initialize(int *lattice, int size, int setData){
                 for(int j = 0; j < size; j++)
                         for(int k = 0; k < size; k++)
                                 for (int z = 0; z < size; z++)
-                                        lattice[MajLocation(i,j,k,z,size)] = 1;
+                                        lattice[MajLocation(i,j,k,z,size)] = setData;
 
 };
 

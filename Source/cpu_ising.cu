@@ -121,13 +121,13 @@ __host__ void ising_model::SetBeta(double newbeta){
 __host__ void ising_model::Equilibrate(){
 
         //Specify dimensions of the sub_lattice
-        dim3 threads(LatticeSize, LatticeSize/4, LatticeSize/4);
-        dim3 blocks(4, 4, LatticeSize);
+        dim3 threads(LatticeSize, LatticeSize/8, LatticeSize/8);
+        dim3 blocks(8, 8, LatticeSize);
 
 
         /* memsize is the size of the shared memory lattice for each block
-           Dimensions:     X                Y                    Z                T                    */
-        int memsize = (LatticeSize + 2)*(LatticeSize/4 + 2)*(LatticeSize/4 + 2) * 3;
+           Dimensions:     X                Y                    Z                T   */
+        int memsize = (LatticeSize + 2)*(LatticeSize/8 + 2)*(LatticeSize/8 + 2) * 3;
 
 
         //Copy host lattice to gpu

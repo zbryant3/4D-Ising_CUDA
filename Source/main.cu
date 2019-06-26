@@ -26,7 +26,6 @@
 //**************************************
 #define LATTSIZE 16 //Must be multiple of 4 for now
 #define J .5
-#define BETA 0.2
 #define H 0.1
 
 #define EQSWEEPS 100
@@ -66,8 +65,12 @@ double Standard_Deviation(vector<double> avgspin)
 //**********************
 int main()
 {
+  double temp{STARTTEMP};
+
   //Create a Ising Model object to perform operations on
-  ising_model ising(LATTSIZE, J, BETA, H);
+  ising_model ising(LATTSIZE, J, (1/temp), H);
+
+  ising.SetBeta(1/temp);
 
 
   //Files for logging data
@@ -96,8 +99,7 @@ int main()
   name += ").dat";
   File1.open( name, ios::out | ios::trunc );
   double average{0};
-  double temp{STARTTEMP};
-  ising.SetBeta(1/temp);
+
 
   //Calculation of avg. spin vs temperature, i.e. we change beta,
   cout << "****************** ITERATING TEMP ************************ \n";
@@ -133,6 +135,8 @@ int main()
   while(temp < TEMPLIMIT);
 
   File1.close();
+
+
 
   /*
   //Plots the data automatically

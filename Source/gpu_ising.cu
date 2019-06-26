@@ -47,19 +47,33 @@ __device__ int gpu_Ising::LookUp(int loc){
  */
 __device__ void gpu_Ising::PopulateSubLattice(){
 
+
+
+        if(blockIdx.x == 0 && blockIdx.y == 0 && blockIdx.z == 0){
+          printf("Major X: %d\t Major Y: %d\t Major Z: %d\t Major T: %d\n Up: %d\t Up: %d\t Up: %d\t Up: %d\n Down: %d\t Down: %d\t Down: %d\t Down: %d\n\n",
+                  majorX, majorY, majorZ, majorT,
+                  LookUp(majorX), LookUp(majorY), LookUp(majorZ), LookUp(majorT),
+                  LookDown(majorX), LookDown(majorY), LookDown(majorZ), LookDown(majorT));
+        }
+        __syncthreads();
+
+
+
         //Fill the normal spots
         SubLattice[SubLocation(minorX, minorY, minorZ, minorT, *LatticeSize)]
                 = Lattice[MajLocation(majorX, majorY, majorZ, majorT, *LatticeSize)];
+        __syncthreads();
 
         //Fill looking up in the T direction
         SubLattice[SubLocation(minorX, minorY, minorZ, minorT + 1, *LatticeSize)]
                 = Lattice[MajLocation(majorX, majorY, majorZ, LookUp(majorT), *LatticeSize)];
+        __syncthreads();
 
         //Fill looking Down in the T direction
         SubLattice[SubLocation(minorX, minorY, minorZ, minorT - 1, *LatticeSize)]
                 = Lattice[MajLocation(majorX, majorY, majorZ, LookDown(majorT), *LatticeSize)];
-
         __syncthreads();
+
 
         //Fill looking up in the X direction
         if(minorY == blockDim.y && minorZ == blockDim.z) {
@@ -76,8 +90,9 @@ __device__ void gpu_Ising::PopulateSubLattice(){
                         = Lattice[MajLocation(LookDown(majorX), majorY, majorZ, majorT, *LatticeSize)];
 
         }
-
         __syncthreads();
+
+
         //Fill looking up in the Y direction
         if(minorX == blockDim.x && minorZ == blockDim.z) {
 
@@ -89,12 +104,12 @@ __device__ void gpu_Ising::PopulateSubLattice(){
         //Fill looking down in the Y direction
         if(minorX == 1 && minorZ == 1) {
 
-                SubLattice[SubLocation(minorX, minorY + 1, minorZ, minorT, *LatticeSize)]
+                SubLattice[SubLocation(minorX, minorY - 1, minorZ, minorT, *LatticeSize)]
                         = Lattice[MajLocation(majorX, LookDown(majorY), majorZ, majorT, *LatticeSize)];
 
         }
-
         __syncthreads();
+
 
         //Fill looking up in the Z direction
         if(minorX == blockDim.x && minorY == blockDim.y) {
@@ -111,7 +126,6 @@ __device__ void gpu_Ising::PopulateSubLattice(){
                         = Lattice[MajLocation(majorX, majorY, LookDown(majorZ), majorT, *LatticeSize)];
 
         }
-
         __syncthreads();
 
 };
@@ -255,19 +269,20 @@ __device__ gpu_Ising::gpu_Ising(int *size, double *setbeta,
  */
 __device__ void gpu_Ising::Equilibrate(){
 
-        PopulateSubLattice();
 
         //Checkerboard pattern for 4D (ie odd/even T locations equilibrate)
         int remainder = blockIdx.z%2;
 
         //Even T dimension locations
         if(remainder == 0) {
+                PopulateSubLattice();
                 ThreeDEquilibrate();
         }
         __syncthreads();
 
         //Odd T dimension locations
         if(remainder == 1) {
+                PopulateSubLattice();
                 ThreeDEquilibrate();
         }
         __syncthreads();
