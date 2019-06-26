@@ -56,8 +56,8 @@ CUDA_CALLABLE_MEMBER int MajLocation(int x, int y, int z, int t, int LatticeSize
 
 CUDA_CALLABLE_MEMBER int SubLocation(int x, int y, int z, int t, int LatticeSize){
 
-        return (x + y*(LatticeSize + 2) + z*(LatticeSize + 2)*(LatticeSize/2 + 2)
-        + t*(LatticeSize + 2)*(LatticeSize/2 + 2)*(LatticeSize/2 + 2));
+        return (x + y*(LatticeSize + 2) + z*(LatticeSize + 2)*(LatticeSize/4 + 2)
+        + t*(LatticeSize + 2)*(LatticeSize/4 + 2)*(LatticeSize/4 + 2));
 };
 
 

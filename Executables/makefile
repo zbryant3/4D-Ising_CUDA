@@ -1,5 +1,5 @@
 CC = nvcc
-CFLAGS = -arch=sm_35
+CFLAGS = -arch=sm_35 --ptxas-options -v
 LFLAGS = -o
 MAINFLAGS = -I -lboost_iostreams -lboost_system -lboost_filesystem
 

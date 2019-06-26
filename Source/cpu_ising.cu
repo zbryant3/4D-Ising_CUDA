@@ -90,10 +90,15 @@ __host__ ising_model::~ising_model(){
 /**
  * Averages the spin of the lattice
  * @return - average spin
- */ /*
-   __host__ double ising_model::AverageSpin(){
-   return host_lattice->AverageLattice();
-   }; */
+ */
+__host__ double ising_model::AverageSpin(){
+
+        double average{0};
+        for(int i = 0; i < ArrSize; i++)
+                average += host_lattice[i];
+
+        return (average/ArrSize);
+};
 
 
 
@@ -116,17 +121,18 @@ __host__ void ising_model::SetBeta(double newbeta){
 __host__ void ising_model::Equilibrate(){
 
         //Specify dimensions of the sub_lattice
-        dim3 threads(LatticeSize, LatticeSize/2, LatticeSize/2);
-        dim3 blocks(2, 2, LatticeSize);
+        dim3 threads(LatticeSize, LatticeSize/4, LatticeSize/4);
+        dim3 blocks(4, 4, LatticeSize);
 
 
         /* memsize is the size of the shared memory lattice for each block
            Dimensions:     X                Y                    Z                T                    */
-        int memsize = (LatticeSize + 2)*(LatticeSize/2 + 2)*(LatticeSize/2 + 2) * 3;
+        int memsize = (LatticeSize + 2)*(LatticeSize/4 + 2)*(LatticeSize/4 + 2) * 3;
 
 
         //Copy host lattice to gpu
         cudaMemcpy(gpu_lattice, host_lattice, ArrSize*sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(GPU_beta, &beta, sizeof(double), cudaMemcpyHostToDevice);
 
 
         //Equilibrate lattice on GPU
