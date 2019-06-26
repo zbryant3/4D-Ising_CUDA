@@ -14,6 +14,10 @@
 #include "lattice.cuh"
 #include "cpu_ising.cuh"
 
+//CUDA enabled random number generator
+#include <cuda.h>
+#include <curand_kernel.h>
+
 using namespace std;
 
 
@@ -26,9 +30,18 @@ private:
   double *j;
   double *h;
 
+  int minorX;
+  int minorY;
+  int minorZ;
+  int minorT;
+
+  int majorX;
+  int majorY;
+  int majorZ;
+  int majorT;
+
   int *Lattice;
   int *SubLattice;
-
 
   //Looks down in a given dimension, if the dimension is too small it returns
   // the size of the lattice -1, giving the lattice a periodic nature
@@ -43,21 +56,15 @@ private:
   //Populates the sublattice from the major lattice
   __device__ void PopulateSubLattice();
 
-
   //Equilibrate the 3D segments of the Lattice
-  __device void ThreeDEquilibrate();
+  __device__ void ThreeDEquilibrate();
 
   //Gets the difference in energy if spin is changed
-  //__device__ double EnergyDiff(variables, int*);
+  __device__ double EnergyDiff(int, int);
 
 
   //Returns the Boltzmann distribution of a given energy difference
-  //_device__ float BoltzmannDist(variables, double);
-
-
-  //Equilibriates a given sublattice
-  //__device__ void ThreadEquilibriate(variables, int*);
-
+  __device__ double BoltzmannDist(double);
 
 public:
 
