@@ -48,7 +48,6 @@ __host__ ising_model::ising_model(int lattSize, double jay, double betaset, doub
         h = hset;
         ArrSize = LatticeSize*LatticeSize*LatticeSize*LatticeSize;
 
-
         //Allocate gpu memory and then copy from host memory
         cudaMalloc((void**)&GPU_LatticeSize, sizeof(int));
         cudaMalloc((void**)&GPU_j, sizeof(double));
@@ -80,7 +79,7 @@ __host__ ising_model::~ising_model(){
         cudaFree(GPU_beta);
         cudaFree(GPU_LatticeSize);
 
-        delete host_lattice;
+        delete[] host_lattice;
         cudaFree(gpu_lattice);
 };
 
@@ -124,7 +123,6 @@ __host__ void ising_model::Equilibrate(){
         dim3 threads(LatticeSize, LatticeSize/8, LatticeSize/8);
         dim3 blocks(8, 8, LatticeSize);
 
-
         /* memsize is the size of the shared memory lattice for each block
            Dimensions:     X                Y                    Z                T   */
         int memsize = (LatticeSize + 2)*(LatticeSize/8 + 2)*(LatticeSize/8 + 2) * 3;
@@ -136,12 +134,21 @@ __host__ void ising_model::Equilibrate(){
 
 
         //Equilibrate lattice on GPU
-        GPU_Equilibriate<<<blocks, threads, memsize*sizeof(int)>>>(
-                GPU_LatticeSize, GPU_beta, GPU_j, GPU_h, gpu_lattice);
+        GPU_Equilibriate<<<blocks, threads, memsize*sizeof(int)>>>(GPU_LatticeSize, GPU_beta, GPU_j, GPU_h, gpu_lattice);
         cudaDeviceSynchronize();
 
 
         //Copy Equilibrated lattice back to host
         cudaMemcpy(host_lattice, gpu_lattice, ArrSize*sizeof(int), cudaMemcpyDeviceToHost);
+
+};
+
+
+
+//Gets the correlation of the lattice sites
+__host__ double ising_model::Correlation(){
+
+  Equilibrate();
+  return 0;
 
 };

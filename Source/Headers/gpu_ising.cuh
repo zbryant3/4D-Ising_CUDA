@@ -66,6 +66,9 @@ private:
   //Returns the Boltzmann distribution of a given energy difference
   __device__ double BoltzmannDist(double);
 
+  //Returns the sum of the neigherbors spin at a lattice site
+  __device__ double SumNeighborSpin();
+
 public:
 
   //Constructor
@@ -78,61 +81,5 @@ public:
 
 };
 
-
-
-
-
-
-
-
-
-/*
-
-//**********************************
-//    Class for GPU Ising model    *
-//**********************************
-class gpu_ising_model
-{
-private:
-  variables *host_mem;
-  variables *gpu_mem;
-  int *host_major_lattice;
-  int *gpu_major_lattice;
-
-
-  //Equilibrates sublattices on the gpu
-  //__global__ void GPU_Equilibriate(std::vector<std::vector<int>>);
-
-
-
-
-
-
-
-public:
-
-  //Constructor - Creates the lattice in the host memory and the device memory
-  //Input Parameters - Lattice Dimension,
-  __host__ ising_model(int, double, double, double);
-
-
-  //Destructor - Deletes dynamically allocated memory
-  __host__ ~ising_model();
-
-
-  //Gets the average spin of the lattice using the gpu
-  __host__ double AverageSpin();
-
-  __host__ void SetBeta(double newbeta){
-    host_mem->beta = newbeta;
-    cudaMemcpy(gpu_mem, host_mem, sizeof(variables), cudaMemcpyHostToDevice);
-  }
-
-
-  //Equilibrates the lattice
-  __host__ void Equilibrate();
-};
-
-*/
 
 #endif

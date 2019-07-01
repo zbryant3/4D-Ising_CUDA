@@ -52,20 +52,3 @@ CUDA_CALLABLE_MEMBER void Initialize(int *lattice, int size, int setData){
                                         lattice[MajLocation(i,j,k,z,size)] = setData;
 
 };
-
-
-/*
-   //Averages over the whole lattice
-   //Note: This will only work for simple data types such as int, double, etc.
-   CUDA_CALLABLE_MEMBER  double lattice::AverageLattice(){
-   double total{0};
-
-   for(int i = 0; i < xyzsize; i++)
-    for(int j = 0; j < xyzsize; j++)
-      for(int k = 0; k < xyzsize; k++)
-        for (int z = 0; z < tsize; z++)
-          total += ReturnLocation(i, j, k, z);
-
-   return total/(xyzsize*xyzsize*xyzsize*tsize);
-
-   }; */

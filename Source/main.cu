@@ -24,15 +24,16 @@
 //**************************************
 //   Definition of all the variables   *
 //**************************************
-#define LATTSIZE 16 //Must be multiple of 4 for now
+#define LATTSIZE 16 //Must be multiple of 8 for now
 #define J .5
-#define H 0.1
+#define H 0.5
 
-#define EQSWEEPS 100
-#define CONFIGS 1000
-#define STARTTEMP 0.2
-#define TEMPCHANGE 0.1
-#define TEMPLIMIT 5
+#define EQSWEEPS 10000
+#define CONFIGS 500
+#define STARTTEMP 5
+#define TEMPCHANGE -0.05
+#define TEMPLIMIT 0.2
+
 
 using namespace std;
 
@@ -72,6 +73,22 @@ int main()
 
   ising.SetBeta(1/temp);
 
+  /*            FOR CORRELATION
+  fstream File;
+  File.open("Corr_vs_Eq.dat", ios::out | ios::trunc);
+  cout << "************************   EQUILIBRATING   ***********************\n";
+  for(int i = 0; i < CONFIGS; i++){
+    File << i << " " << ising.Correlation() << "\n";
+    File.flush();
+
+  }
+  File.close();
+
+  */
+
+
+
+
 
   //Files for logging data
   fstream File0, File1;
@@ -100,14 +117,12 @@ int main()
   File1.open( name, ios::out | ios::trunc );
   double average{0};
 
-
   //Calculation of avg. spin vs temperature, i.e. we change beta,
   cout << "****************** ITERATING TEMP ************************ \n";
   do
   {
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 100; i++){
       ising.Equilibrate();
-      cudaDeviceSynchronize();
     }
 
     //Collects the average spin based on how many CONFIGS desired
@@ -116,7 +131,6 @@ int main()
       //Seperates configurations for measurement
       for(int j = 0; j < 2; j++){
         ising.Equilibrate();
-        cudaDeviceSynchronize();
       }
 
       //Measure avg. over all spins of a given configurations
@@ -132,7 +146,7 @@ int main()
     ising.SetBeta(1/(temp));
     cudaDeviceSynchronize();
   }
-  while(temp < TEMPLIMIT);
+  while(temp > TEMPLIMIT);
 
   File1.close();
 

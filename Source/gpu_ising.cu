@@ -48,14 +48,14 @@ __device__ int gpu_Ising::LookUp(int loc){
 __device__ void gpu_Ising::PopulateSubLattice(){
 
 
-
-        if(blockIdx.x == 0 && blockIdx.y == 0 && blockIdx.z == 0){
-          printf("Major X: %d\t Major Y: %d\t Major Z: %d\t Major T: %d\n Up: %d\t Up: %d\t Up: %d\t Up: %d\n Down: %d\t Down: %d\t Down: %d\t Down: %d\n\n",
+        /*
+           if(blockIdx.x == 0 && blockIdx.y == 0 && blockIdx.z == 0){
+           printf("Major X: %d\t Major Y: %d\t Major Z: %d\t Major T: %d\n Up: %d\t Up: %d\t Up: %d\t Up: %d\n Down: %d\t Down: %d\t Down: %d\t Down: %d\n\n",
                   majorX, majorY, majorZ, majorT,
                   LookUp(majorX), LookUp(majorY), LookUp(majorZ), LookUp(majorT),
                   LookDown(majorX), LookDown(majorY), LookDown(majorZ), LookDown(majorT));
-        }
-        __syncthreads();
+           }
+           __syncthreads(); */
 
 
 
@@ -76,15 +76,16 @@ __device__ void gpu_Ising::PopulateSubLattice(){
 
 
         //Fill looking up in the X direction
-        if(minorY == blockDim.y && minorZ == blockDim.z) {
+        if(minorX == blockDim.x) {
 
                 SubLattice[SubLocation(minorX + 1, minorY, minorZ, minorT, *LatticeSize)]
                         = Lattice[MajLocation(LookUp(majorX), majorY, majorZ, majorT, *LatticeSize)];
 
         }
 
+
         //Fill looking down in the X direction
-        if(minorY == 1 && minorZ == 1) {
+        if(minorX == 1) {
 
                 SubLattice[SubLocation(minorX - 1, minorY, minorZ, minorT, *LatticeSize)]
                         = Lattice[MajLocation(LookDown(majorX), majorY, majorZ, majorT, *LatticeSize)];
@@ -94,15 +95,16 @@ __device__ void gpu_Ising::PopulateSubLattice(){
 
 
         //Fill looking up in the Y direction
-        if(minorX == blockDim.x && minorZ == blockDim.z) {
+        if(minorY == blockDim.y) {
 
                 SubLattice[SubLocation(minorX, minorY + 1, minorZ, minorT, *LatticeSize)]
                         = Lattice[MajLocation(majorX, LookUp(majorY), majorZ, majorT, *LatticeSize)];
 
         }
 
+
         //Fill looking down in the Y direction
-        if(minorX == 1 && minorZ == 1) {
+        if(minorY == 1) {
 
                 SubLattice[SubLocation(minorX, minorY - 1, minorZ, minorT, *LatticeSize)]
                         = Lattice[MajLocation(majorX, LookDown(majorY), majorZ, majorT, *LatticeSize)];
@@ -112,15 +114,16 @@ __device__ void gpu_Ising::PopulateSubLattice(){
 
 
         //Fill looking up in the Z direction
-        if(minorX == blockDim.x && minorY == blockDim.y) {
+        if(minorZ == blockDim.z) {
 
                 SubLattice[SubLocation(minorX, minorY, minorZ + 1, minorT, *LatticeSize)]
                         = Lattice[MajLocation(majorX, majorY, LookUp(majorZ), majorT, *LatticeSize)];
 
         }
 
+
         //Fill looking down in the Z direction
-        if(minorX == blockDim.x && minorY == blockDim.y) {
+        if(minorZ == 1) {
 
                 SubLattice[SubLocation(minorX, minorY, minorZ - 1, minorT, *LatticeSize)]
                         = Lattice[MajLocation(majorX, majorY, LookDown(majorZ), majorT, *LatticeSize)];
@@ -131,6 +134,15 @@ __device__ void gpu_Ising::PopulateSubLattice(){
 };
 
 
+//Returns the sum of the neigherbors spin at a lattice site
+__device__ double gpu_Ising::SumNeighborSpin(){
+
+        return 0;
+
+};
+
+
+
 /**
  * Gets the difference in energy based on neighboring spins
  * @param  old_spin - The old spin at the lattice site
@@ -138,8 +150,8 @@ __device__ void gpu_Ising::PopulateSubLattice(){
  * @return          - The energy difference
  */
 __device__ double gpu_Ising::EnergyDiff(int old_spin, int new_spin){
-
         double sumNeighborSpin{0};
+        double EnergyDiff{0};
 
         //Look at neighbors in the X direction
         sumNeighborSpin += SubLattice[SubLocation(minorX + 1, minorY, minorZ, minorT, *LatticeSize)];
@@ -157,9 +169,9 @@ __device__ double gpu_Ising::EnergyDiff(int old_spin, int new_spin){
         sumNeighborSpin += SubLattice[SubLocation(minorX, minorY, minorZ, minorT + 1, *LatticeSize)];
         sumNeighborSpin += SubLattice[SubLocation(minorX, minorY, minorZ, minorT - 1, *LatticeSize)];
 
-        return ((-1)*(*j)*sumNeighborSpin*(old_spin - new_spin)
-                + (-1)*(*h)*(old_spin - new_spin));
+        EnergyDiff = ((-1)*(*j)*(sumNeighborSpin)*(new_spin - old_spin) + (-1)*(*h)*(new_spin - old_spin));
 
+        return EnergyDiff;
 };
 
 
@@ -167,7 +179,8 @@ __device__ double gpu_Ising::EnergyDiff(int old_spin, int new_spin){
 
 //Returns the Boltzmann distribution of a given energy difference
 __device__ double gpu_Ising::BoltzmannDist(double energydiff){
-        return expf((-1)*(*beta)*energydiff);
+
+        return exp((-1)*(*beta)*energydiff);
 };
 
 
@@ -180,9 +193,8 @@ __device__ void gpu_Ising::ThreeDEquilibrate(){
 
         int remainder = (minorX + minorY + minorZ)%2;
 
-        int tid = MajLocation(threadIdx.x, (threadIdx.y + blockIdx.x * blockDim.y),
-                              (threadIdx.z + blockIdx.y * blockDim.z), blockIdx.z, *LatticeSize);
-
+        //int tid = MajLocation(majorX, majorY, majorZ, majorT, *LatticeSize);
+        int tid = SubLocation(minorX, minorY, minorZ, minorT, *LatticeSize);
 
         curandState_t rng;
         curand_init(clock64(), tid, 0, &rng);
@@ -216,6 +228,12 @@ __device__ void gpu_Ising::ThreeDEquilibrate(){
                 }
         }
         __syncthreads();
+
+        //Save sub lattice back to major lattice
+        Lattice[MajLocation(majorX, majorY, majorZ, majorT, *LatticeSize)] = SubLattice[SubLocation(minorX, minorY, minorZ, minorT, *LatticeSize)];
+
+
+
 
 };
 
@@ -269,26 +287,21 @@ __device__ gpu_Ising::gpu_Ising(int *size, double *setbeta,
  */
 __device__ void gpu_Ising::Equilibrate(){
 
-
         //Checkerboard pattern for 4D (ie odd/even T locations equilibrate)
-        int remainder = blockIdx.z%2;
+        int Tremainder = blockIdx.z%2;
 
         //Even T dimension locations
-        if(remainder == 0) {
+        if(Tremainder == 0) {
                 PopulateSubLattice();
                 ThreeDEquilibrate();
         }
         __syncthreads();
 
         //Odd T dimension locations
-        if(remainder == 1) {
+        if(Tremainder == 1) {
                 PopulateSubLattice();
                 ThreeDEquilibrate();
         }
         __syncthreads();
-
-        //Fill the normal spots
-        Lattice[MajLocation(majorX, majorY, majorZ, majorT, *LatticeSize)]
-                = SubLattice[SubLocation(minorX, minorY, minorZ, minorT, *LatticeSize)];
 
 };

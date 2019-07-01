@@ -17,7 +17,7 @@
 using namespace std;
 
 
-//Kernal for GPU
+//Kernal for GPU Equilibration
 __global__ void GPU_Equilibriate(int*, double*, double*, double*, int*);
 
 
@@ -65,6 +65,9 @@ __host__ void SetBeta(double newbeta);
 
 //Equilibrates the lattice by envoking a GPU kernal
 __host__ void Equilibrate();
+
+//Gets the correlation of the lattice sites
+__host__ double Correlation();
 
 
 };
